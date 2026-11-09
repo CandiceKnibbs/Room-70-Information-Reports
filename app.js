@@ -8,7 +8,7 @@ const card=(n,title,body,key,done)=>`<section class="card"><h3><span class="step
 const labels={bronze:'Bronze',silver:'Silver',gold:'Gold'};
 const spellLabels={1:'Bronze 1',2:'Bronze 2',3:'Silver',4:'Gold 1',5:'Gold 2'};
 let lesson=1,spellingData;
-try{lesson=Number(location.hash.slice(1))||1;}catch{}lesson=Math.min(5,Math.max(1,lesson));
+try{lesson=Number(location.hash.slice(1))||1;}catch{}lesson=Math.min(10,Math.max(1,Math.trunc(lesson)));
 const texts={bronze:{title:'Search Dog',author:'Rebekah White',issue:'Level 2 · November 2024',pages:'Read PDF pages 1–4. The final page contains credits.'},silver:{title:'New New Zealanders',author:'Adrienne Jansen',issue:'Level 3 · November 2017',pages:'This PDF contains only your article: printed pages 34–41.'},gold:{title:'Rongoā for the Land',author:'Mere Whaanga',issue:'Level 4 · November 2020',pages:'Read PDF pages 1–4 (printed pages 2–9). The final page contains credits.'}};
 const readTasks={
 bronze:[
@@ -66,10 +66,15 @@ list(['Choose your own focused topic linked to compassion and New Zealand histor
 ]};
 const sourceLinks=`<p>Use a book, trusted website, museum resource or interview that fits <strong>your topic</strong>. The links below are optional starting points.</p><ul><li><a href="https://www.spca.nz/about/our-history" target="_blank" rel="noopener">SPCA: our history ↗</a></li><li><a href="https://paralympics.org.nz/about/what-we-do/nz-at-the-paralympics/" target="_blank" rel="noopener">New Zealand at the Paralympics ↗</a></li><li><a href="https://nzhistory.govt.nz/page/polish-refugees-land-new-zealand" target="_blank" rel="noopener">Polish refugees arrive in New Zealand ↗</a></li><li><a href="https://nzhistory.govt.nz/culture/responding-to-tragedy/wahine-1968" target="_blank" rel="noopener">The Wahine rescue ↗</a></li></ul>${detail('Our journal texts — optional sources','<p><a class="btn" href="assets/bronze.pdf" target="_blank" rel="noopener">Search Dog ↗</a><a class="btn" href="assets/silver.pdf" target="_blank" rel="noopener">New New Zealanders ↗</a><a class="btn" href="assets/gold.pdf" target="_blank" rel="noopener">Rongoā for the Land ↗</a></p>')}<p class="small">Record the source title and page or website address. Check dates and keep the facts accurate.</p>`;
 let activity='spelling';
-let choices={reading:'bronze',writing:'bronze',spelling:'1'};
+let choices={reading:'bronze',writing:'bronze',spelling:'1',newSpelling:'bronze'};
 const dayNames=['Reading','Writing','Reading','Writing','Research & plan'];
 const dayGoals=['Find facts and retell in order.','Recognise and organise an information report.','Explain main ideas and make inferences.','Choose a topic and make research notes.','Organise facts into a report plan.'];
 const successCriteria=[['I can find facts in the text.','I can retell events or stages in order.'],['I can identify report features.','I can group related facts.'],['I can explain a main idea.','I can support an inference with a clue.'],['I can link my topic to compassion and NZ history.','I can record notes and sources.'],['I can organise facts under headings.','I can identify information I still need.']];
+for (const [title, , goal, success] of Object.values(newLessons)) {
+ dayNames.push(title);
+ dayGoals.push(goal);
+ successCriteria.push([success]);
+}
 function go(n,tabName){lesson=n;activity=tabName||'spelling';window.history.replaceState(null,'','#'+n);render();window.scrollTo({top:0,behavior:'smooth'});}
 
 
@@ -105,6 +110,7 @@ function vocabularyTask(colour){
 }
 
 function readingPage(){
+ if(lesson>5)return extensionReading();
  const colour=choices.reading,t=texts[colour];
  const resource=`<span class="tag ${colour}">${labels[colour]}</span><h3>${t.title}</h3><p class="small">${t.author} · School Journal ${t.issue}<br>${t.pages}</p><a class="btn" href="assets/${colour}.pdf#page=1" target="_blank" rel="noopener">Open your reading ↗</a>`;
  if(lesson===2||lesson===4){const prev=lesson===2?1:3;return `<section class="card">${resource}<p><strong>Today’s main activity is writing.</strong></p><p>Use this text for facts, or finish an earlier answer.</p><button data-go="${prev}" data-activity="reading">Revisit Lesson ${prev} reading →</button></section>`;}
@@ -146,6 +152,7 @@ function writingBookTemplate(){
 }
 
 function writingPage(){
+ if(lesson>5)return extensionWriting();
  const c=choices.writing,base=writingPageContent();
  if(![2,4,5].includes(lesson))return base;
  const parts=writingBookTemplates[lesson][c];
@@ -175,24 +182,48 @@ function writingPage(){
  return intro+`<section class="card"><span class="tag ${c}">${labels[c]}</span><h3>Your task</h3><p>Work through one question at a time. Use the template directly below it.</p>${tasks.map(([q,l])=>pair(q,l)).join('')}${check(`simple-write-${c}-${lesson}`,'I completed the tasks and checked my work.')}</section><section class="card exit"><h3>Check and share</h3><p>${lesson===2?'How do headings help a reader?':lesson===4?'How does your topic link to compassion and New Zealand history?':'What do you still need to find out?'}</p></section>`;
 }
 
-function spellingPage(){const level=choices.spelling,words=spellingData.words[level];
+function spellingPage(){if(lesson>5)return extensionSpelling();
+ const level=choices.spelling,words=spellingData.words[level];
  const task=lesson===1?'<p>Choose five tricky words. Look → cover → write → check.</p>':spellingData.tasks[level][lesson-2][1].replace(/Group ([1-5])/g,(_,n)=>spellLabels[n]);
  const title=lesson===1?'Choose five focus words':spellingData.tasks[level][lesson-2][0].replace(/^\d+\. /,'');
  return `<section class="card learn"><h3>Spelling</h3><p>Complete today’s activity. Continue unfinished practice from last week if needed.</p></section><section class="card"><span class="tag">${spellLabels[level]}</span><h3>${title}</h3>${task}${detail('Your 20 spelling words','<ol class="words">'+words.map(w=>'<li>'+w+'</li>').join('')+'</ol>').replace('<details>','<details open>')}${check(`simple-spell-${level}-${lesson}`,'I tested my words and corrected mistakes.')}${detail('More spelling practice',spellingData.tasks[level].map(([t,b])=>'<h4>'+t.replace(/^\d+\. /,'')+'</h4>'+b.replace(/Group ([1-5])/g,(_,n)=>spellLabels[n])).join(''))}</section><button data-go="${lesson}" data-activity="${[1,3].includes(lesson)?'reading':'writing'}">Continue to today’s ${[1,3].includes(lesson)?'reading':'writing'} →</button>`;
 }
 function render(){
- const availableActivities=[1,3].includes(lesson)?['spelling','reading']:['spelling','writing'];
+ const availableActivities=newLessons[lesson]?.[1] || ([1,3].includes(lesson)?['spelling','reading']:['spelling','writing']);
+ const choiceKey=activity==='spelling' && lesson>5?'newSpelling':activity;
+ const legacySpelling=choiceKey==='spelling';
+ const opts=legacySpelling?spellLabels:labels;
  if(!availableActivities.includes(activity))activity='spelling';
  $('lessons').innerHTML=dayNames.map((name,i)=>`<button data-go="${i+1}" ${lesson===i+1?'aria-current="step"':''}>Lesson ${i+1}<small>${name}</small></button>`).join('');
- $('today').innerHTML=`<p class="eyebrow">Lesson ${lesson} · ${dayNames[lesson-1]}</p><h2>${dayNames[lesson-1]}</h2><section class="learning-bubble" aria-label="WALT and success criteria"><p class="bubble-walt"><strong>WALT:</strong> ${dayGoals[lesson-1]}</p><div class="simple-sc"><strong>Success criteria (no need to copy in your book)</strong><ul>${successCriteria[lesson-1].map(x=>'<li>'+x+'</li>').join('')}</ul></div></section><div class="book-standard"><p class="small"><strong>Set up your book like this. Copy the WALT, not the success criteria.</strong></p><div class="book-line">Date: Today’s date</div><div class="book-line book-under">WALT: ${dayGoals[lesson-1]}</div><div class="book-line book-under">Lesson ${lesson} — ${activity[0].toUpperCase()+activity.slice(1)} · ${activity==='spelling'?spellLabels[choices.spelling]:labels[choices[activity]]}</div><div class="book-line">Start your work here.</div></div><p class="small">Start with Spelling. Then open ${[1,3].includes(lesson)?'Reading':'Writing'} — choose your colour.</p>`;
+ let goal=dayGoals[lesson-1],criteria=successCriteria[lesson-1],heading=dayNames[lesson-1];
+ if(lesson>5){
+  heading=activity[0].toUpperCase()+activity.slice(1);
+  if(activity==='spelling'){
+   goal='Practise spelling words accurately.';
+   criteria=['I can check my spelling and correct any mistakes.'];
+  }
+  if(lesson===10 && activity==='reading'){
+   goal='Use clues to make inferences.';
+   criteria=['I can support my inference with a clue from the text.'];
+  }
+  if(lesson===10 && activity==='writing'){
+   goal='Check and improve my information report.';
+   criteria=['I can improve a sentence and check my headings, facts and sources.'];
+  }
+ }
+ $('today').innerHTML=`<p class="eyebrow">Lesson ${lesson} · ${dayNames[lesson-1]}</p><h2>${heading}</h2><section class="learning-bubble" aria-label="WALT and success criteria"><p class="bubble-walt"><strong>WALT:</strong> ${goal}</p><div class="simple-sc"><strong>Success criteria (no need to copy in your book)</strong><ul>${criteria.map(x=>'<li>'+x+'</li>').join('')}</ul></div></section><div class="book-standard"><p class="small"><strong>Set up your book like this. Copy the WALT, not the success criteria.</strong></p><div class="book-line">Date: Today’s date</div><div class="book-line book-under">WALT: ${goal}</div><div class="book-line book-under">Lesson ${lesson} — ${activity[0].toUpperCase()+activity.slice(1)} · ${opts[choices[choiceKey]]}</div><div class="book-line">Start your work here.</div></div><p class="small">Start with Spelling. Then open ${availableActivities[1]==='reading'?'Reading':'Writing'} — choose your colour.</p>`;
+ const firstPanel=lesson>5?'activities':'today';
+ const secondPanel=lesson>5?'today':'activities';
+ const first=$(firstPanel),second=$(secondPanel);
+ if(first.nextElementSibling!==second)second.before(first);
  $('activities').innerHTML=availableActivities.map(a=>`<button data-tab="${a}" aria-pressed="${activity===a}">${a[0].toUpperCase()+a.slice(1)}</button>`).join('');
- const opts=activity==='spelling'?spellLabels:labels;
- $('levels').innerHTML=Object.entries(opts).map(([value,label])=>`<button class="level ${activity==='spelling'?(value==='1'||value==='2'?'bronze':value==='3'?'silver':'gold'):value}" data-choice="${value}" aria-pressed="${choices[activity]===value}">${label}</button>`).join('');
- $('content').innerHTML=({reading:readingPage,writing:writingPage,spelling:spellingPage}[activity])()+`<nav class="next" aria-label="Move between lessons">${lesson>1?`<button data-go="${lesson-1}">← Lesson ${lesson-1}</button>`:'<span></span>'}${lesson<5?`<button data-go="${lesson+1}">Lesson ${lesson+1} →</button>`:'<span>Ready to draft next week.</span>'}</nav>`;
+
+ $('levels').innerHTML=Object.entries(opts).map(([value,label])=>`<button class="level ${legacySpelling?(value==='1'||value==='2'?'bronze':value==='3'?'silver':'gold'):value}" data-choice="${value}" aria-pressed="${choices[choiceKey]===value}">${label}</button>`).join('');
+ $('content').innerHTML=({reading:readingPage,writing:writingPage,spelling:spellingPage}[activity])()+`<nav class="next" aria-label="Move between lessons">${lesson>1?`<button data-go="${lesson-1}">← Lesson ${lesson-1}</button>`:'<span></span>'}${lesson<10?`<button data-go="${lesson+1}">Lesson ${lesson+1} →</button>`:'<span>You’ve reached Lesson 10.</span>'}</nav>`;
  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(Number(b.dataset.go),b.dataset.activity));
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{activity=b.dataset.tab;render();});
- document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{choices[activity]=b.dataset.choice;try{localStorage.setItem('r70-simple-choices',JSON.stringify(choices));}catch{}render();});
+ document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{choices[choiceKey]=b.dataset.choice;try{localStorage.setItem('r70-simple-choices',JSON.stringify(choices));}catch{}render();});
  document.querySelectorAll('[data-key]').forEach(c=>{try{c.checked=localStorage.getItem('r70-report-'+c.dataset.key)==='1';}catch{}c.onchange=()=>{try{localStorage.setItem('r70-report-'+c.dataset.key,c.checked?'1':'0');}catch{}};});
 }
-async function init(){try{const r=await fetch('spelling.json');if(!r.ok)throw Error();spellingData=await r.json();try{const v=JSON.parse(localStorage.getItem('r70-simple-choices'));if(v){for(const a of ['reading','writing','spelling'])if(Object.hasOwn(a==='spelling'?spellLabels:labels,v[a]))choices[a]=v[a];}}catch{}activity='spelling';render();}catch{$('content').innerHTML='<section class="card"><h2>Refresh to load your lesson</h2><p>Check your connection and refresh the page.</p></section>';}}
+async function init(){try{const r=await fetch('spelling.json');if(!r.ok)throw Error();spellingData=await r.json();try{const v=JSON.parse(localStorage.getItem('r70-simple-choices'));if(v){for(const a of ['reading','writing','spelling','newSpelling'])if(Object.hasOwn(a==='spelling'?spellLabels:labels,v[a]))choices[a]=v[a];}}catch{}activity='spelling';render();}catch{$('content').innerHTML='<section class="card"><h2>Refresh to load your lesson</h2><p>Check your connection and refresh the page.</p></section>';}}
 init();

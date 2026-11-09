@@ -159,6 +159,11 @@ function writingPage(){
  const lines=(p,start=0,end)=>parts[p].slice(1).slice(start,end);
  const pair=(question,rows)=>`<section class="question-pair"><h4>${question}</h4><div class="book-template-page"><p class="small"><strong>In your book:</strong> fill in your own ideas.</p>${rows.map(row=>`<div class="template-line">${row}</div>`).join('')}</div></section>`;
  let intro='',tasks=[];
+ const bronzeExamples={
+  4:'<p><strong>Topic</strong> — Student Volunteer Army after the Christchurch earthquakes.</p><p><strong>Compassion link</strong> — Students gave their time to help people affected by the earthquakes.</p><p><strong>Research question</strong> — What jobs did the volunteers do?</p><p><strong>Research note</strong> — University students organised volunteers to help local communities.</p><p><strong>Source</strong> — University of Canterbury, Student Volunteer Army background.</p>',
+  5:'<p><strong>Working title</strong> — How students helped after the Christchurch earthquakes.</p><p><strong>Introduction notes</strong> — Christchurch, 2010–11, earthquakes, university students organise volunteers.</p><p><strong>Research question</strong> — What did volunteers do to help?</p><p><strong>Heading</strong> — Helping with the clean-up.</p><p><strong>Notes</strong> — Students organised volunteers. Volunteers helped clean up after the earthquakes.</p><p><strong>Source</strong> — University of Canterbury, Student Volunteer Army background.</p><p><strong>Still to find out</strong> — Which areas did the volunteers help?</p>'
+ };
+
  if(lesson===2){
  intro=base.slice(0,base.indexOf('<section class="card"><h3>3. Your task'));
  if(c==='bronze')tasks=[['1. What does an information report do?',lines(0,0,1)],['2. Copy the model’s title and one heading.',lines(0,1,3)],['3. Write two facts from the model.',lines(0,3)],['4. Sort these facts under Their Job or Their Training: dogs look for missing people; training takes two or three years; dogs search in forests and towns; a trainer may use a toy as a reward.',lines(1)]];
@@ -195,21 +200,31 @@ function writingPage(){
  ];
  }
 
+ if(c==='bronze' && bronzeExamples[lesson])intro+=`<section class="card"><h3>Bronze worked example</h3><p>Here’s one way your notes could look. Use the same layout for your own topic.</p>${bronzeExamples[lesson]}</section>`;
  return intro+`<section class="card"><span class="tag ${c}">${labels[c]}</span><h3>Your task</h3><p>Work through one question at a time. Use the template directly below it.</p>${tasks.map(([q,l])=>pair(q,l)).join('')}${check(`simple-write-${c}-${lesson}`,'I completed the tasks and checked my work.')}</section><section class="card exit"><h3>Check and share</h3><p>${lesson===2?'How do headings help a reader?':lesson===4?'How does your topic link to compassion and New Zealand history?':'What do you still need to find out?'}</p></section>`;
 }
 
-function spellingPage(){if(lesson>5)return extensionSpelling();
- const level=choices.spelling,words=spellingData.words[level];
+function spellingSet(level){
+ const words=spellingData.words[level];
  const task=lesson===1?'<p>Choose five tricky words. Look → cover → write → check.</p>':spellingData.tasks[level][lesson-2][1].replace(/Group ([1-5])/g,(_,n)=>spellLabels[n]);
  const title=lesson===1?'Choose five focus words':spellingData.tasks[level][lesson-2][0].replace(/^\d+\. /,'');
- return `<section class="card learn"><h3>Spelling</h3><p>Complete today’s activity. Continue unfinished practice from last week if needed.</p></section><section class="card"><span class="tag">${spellLabels[level]}</span><h3>${title}</h3>${task}${detail('Your 20 spelling words','<ol class="words">'+words.map(w=>'<li>'+w+'</li>').join('')+'</ol>').replace('<details>','<details open>')}${check(`simple-spell-${level}-${lesson}`,'I tested my words and corrected mistakes.')}${detail('More spelling practice',spellingData.tasks[level].map(([t,b])=>'<h4>'+t.replace(/^\d+\. /,'')+'</h4>'+b.replace(/Group ([1-5])/g,(_,n)=>spellLabels[n])).join(''))}</section><button data-go="${lesson}" data-activity="${[1,3].includes(lesson)?'reading':'writing'}">Continue to today’s ${[1,3].includes(lesson)?'reading':'writing'} →</button>`;
+ return `<section class="card"><span class="tag">${lesson>=3?labels[choices.newSpelling]:spellLabels[level]}</span><h3>${title}</h3>${task}${detail('Your 20 spelling words','<ol class="words">'+words.map(w=>'<li>'+w+'</li>').join('')+'</ol>').replace('<details>','<details open>')}${check(`simple-spell-${level}-${lesson}`,'I tested my words and corrected mistakes.')}${detail('More spelling practice',spellingData.tasks[level].map(([t,b])=>'<h4>'+t.replace(/^\d+\. /,'')+'</h4>'+b.replace(/Group ([1-5])/g,(_,n)=>spellLabels[n])).join(''))}</section>`;
+}
+function spellingPage(){
+ if(lesson>5)return extensionSpelling();
+ let sets=spellingSet(choices.spelling);
+ if(lesson>=3){
+  const levels={bronze:[1,2],silver:[3],gold:[4,5]}[choices.newSpelling];
+  sets=levels.length===1?spellingSet(levels[0]):levels.map((level,i)=>detail(`Set ${i+1}`,spellingSet(level))).join('');
+ }
+ return `<section class="card learn"><h3>Spelling</h3><p>${lesson>=3 && choices.newSpelling!=='silver'?'Open the set your teacher assigned, or choose one set if you are working independently.':'Complete today’s activity.'}</p></section>${sets}<button data-go="${lesson}" data-activity="${[1,3].includes(lesson)?'reading':'writing'}">Continue to today’s ${[1,3].includes(lesson)?'reading':'writing'} →</button>`;
 }
 function render(){
  const availableActivities=newLessons[lesson]?.[1] || ([1,3].includes(lesson)?['spelling','reading']:['spelling','writing']);
- const choiceKey=activity==='spelling' && lesson>5?'newSpelling':activity;
+ if(!availableActivities.includes(activity))activity='spelling';
+ const choiceKey=activity==='spelling' && lesson>=3?'newSpelling':activity;
  const legacySpelling=choiceKey==='spelling';
  const opts=legacySpelling?spellLabels:labels;
- if(!availableActivities.includes(activity))activity='spelling';
  $('lessons').innerHTML=dayNames.map((name,i)=>`<button data-go="${i+1}" ${lesson===i+1?'aria-current="step"':''}>Lesson ${i+1}<small>${name}</small></button>`).join('');
  let goal=dayGoals[lesson-1],criteria=successCriteria[lesson-1],heading=dayNames[lesson-1];
  if(lesson>5){

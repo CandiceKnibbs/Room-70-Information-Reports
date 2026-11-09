@@ -174,11 +174,27 @@ function writingPage(){
  intro+=`<section class="card">${writingTeaching[2]}${sourceLinks}</section>`;
  }
  if(lesson===5){
- intro=`<section class="card learn"><h3>Research and plan · ${labels[c]}</h3></section><section class="card"><h3>Build your plan</h3>${writingTeaching[4]}${detail('Open research sources',sourceLinks)}</section>`;
- if(c==='bronze')tasks=[['1. Write a working title and introduce your topic.',lines(0,0,2)],['2. Plan your first section. Add two facts.',lines(0,2,5)],['3. Plan your second section. Add two facts.',lines(0,5,8)],['4. Plan your third section. Add two facts. Check that your plan includes compassion and New Zealand history.',lines(0,8,11)],['5. List your sources. Mark what you still need to find out.',lines(0,11)]];
- if(c==='silver')tasks=[['1. Write a working title and notes for your introduction.',lines(0,0,2)],['2. Choose three headings that fit your questions. Add two facts under each. Include compassion and New Zealand history.',lines(0,2,11)],['3. Write a topic sentence for one section and a closing idea.',lines(0,11,13)],['4. List your sources and next research question.',lines(0,13)]];
- if(c==='gold')tasks=[['1. Write a working title and an introduction that defines your topic.',lines(0,0,2)],['2. Choose three or four sections to answer your questions. Include compassion and New Zealand history. Use a heading, topic sentence and notes for each.',lines(0,2,15)],['3. Plan a useful visual and caption.',lines(0,15,17)],['4. List sources, gaps and a claim to verify in a second source.',lines(0,17)]];
+ const examples=list([
+  '<strong>Pahīatua’s Polish refugee children (1944).</strong> How did people help children displaced by war find safety and settle in Aotearoa? <a href="https://nzhistory.govt.nz/page/polish-refugees-land-new-zealand" target="_blank" rel="noopener">NZHistory ↗</a>',
+  '<strong>The Wahine rescue (1968).</strong> Who helped passengers during and after the ferry disaster? What did they do? <a href="https://nzhistory.govt.nz/culture/responding-to-tragedy/wahine-1968" target="_blank" rel="noopener">NZHistory ↗</a>',
+  '<strong>Student Volunteer Army (2010–11).</strong> How did students help Christchurch communities after the earthquakes? <a href="https://www.canterbury.ac.nz/about-uc/what-we-do/uc-in-the-community/canterbury-knowledge-commons/stories-of-impact/the-uc-student-volunteer-armys-response-to-covid-19" target="_blank" rel="noopener">University of Canterbury ↗</a>'
+ ]);
+ intro=`<section class="card learn"><h3>Research and plan · ${labels[c]}</h3><p><strong>Choose any topic from Aotearoa New Zealand’s history that you can connect to compassion.</strong> You can keep your Lesson 4 topic or change it. Pick a specific event, person, group or action and ask: Who needed help? Who showed care? What did they do?</p>${detail('Need inspiration? See three optional examples',examples+'<p>You can use one of these ideas or bring your own. A story from your local community or whānau can work if you can find evidence to research it.</p>')}</section><section class="card"><h3>My planning template</h3><p>Copy the prompts below into your book or a document. Use short notes in your own words. Save your plan for Lesson 7.</p>${detail('See how a question becomes a heading','<p><strong>Topic</strong> — Student Volunteer Army after the Christchurch earthquakes.</p><p><strong>Question</strong> — What did students do to help?</p><p><strong>Heading</strong> — Students help with the clean-up.</p><p><strong>Note</strong> — University students organised volunteers to help affected communities.</p><p><strong>Source</strong> — University of Canterbury, The UC Student Volunteer Army’s response to COVID-19 (background section).</p>')}</section>`;
+ const groups=[
+  ['What happened?', 'Who was involved? When and where did it happen?', 'What happened and when?'],
+  ['How did people show compassion?', 'Who helped, what did they do, and who benefited?', 'How people helped'],
+  ['What difference did it make?', 'What changed afterwards? What evidence shows the impact?', 'The impact']
+ ];
+ tasks=[
+  ['1. Choose your topic and explain the link.', ['Working title — …','My topic fits Aotearoa New Zealand history because …','It connects to compassion because …','Introduction notes (who, what, where and when) — …']],
+  ...groups.map(([heading,starter,example],i)=>[`${i+2}. Group ${i+1} · ${heading} ${starter}`,[
+    'My research question — …',`My report heading (e.g. ${example}) — …`,'Fact or note 1 — …','Fact or note 2 — …','Source title and page or URL — …'
+  ]]),
+  ['5. Check your plan before drafting.', ['My closing idea — …','One question I still need to answer — …',
+    {bronze:'Say your three headings aloud. Check that each fact fits under its heading.',silver:'Draft a topic sentence for one section. Check that it answers your question.',gold:'Cross-check one important claim with a second source. Record what the sources agree on or where they differ.'}[c]]]
+ ];
  }
+
  return intro+`<section class="card"><span class="tag ${c}">${labels[c]}</span><h3>Your task</h3><p>Work through one question at a time. Use the template directly below it.</p>${tasks.map(([q,l])=>pair(q,l)).join('')}${check(`simple-write-${c}-${lesson}`,'I completed the tasks and checked my work.')}</section><section class="card exit"><h3>Check and share</h3><p>${lesson===2?'How do headings help a reader?':lesson===4?'How does your topic link to compassion and New Zealand history?':'What do you still need to find out?'}</p></section>`;
 }
 

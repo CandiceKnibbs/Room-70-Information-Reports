@@ -27,6 +27,23 @@ const newReading = {
     gold: ['Why might Ann have felt worried when she arrived at the camp?', 'Ann may have felt worried because …', 'What can you infer about how Ngāti Ruanui treated Ann while she cared for people in the camp? Give a clue.', 'I think Ngāti Ruanui treated Ann … A detail that supports this is …', 'In Final years in Hāwera, what does supplement her income mean?', 'Ann ran other businesses to …']
   }
 };
+const readingPractice = {
+  6: {
+    bronze: ['Find two Gap Filler projects. Explain how people used each one.', 'Choose one detail that shows people helping Christchurch recover. Explain how it helped.', 'Use volunteers in a sentence about Christchurch.'],
+    silver: ['Find two ways people helped Zuhaib in Auckland. Who helped and what did each person do?', 'Find one detail in the opening that supports your main idea. Explain the link.', 'Use afford in a sentence that shows its meaning.'],
+    gold: ['Find two details that show how difficult it could be for Ann to reach patients.', 'Choose one detail from Patients that supports your main idea. Explain why it fits.', 'Explain what the bounty adds to your understanding of the situation.']
+  },
+  8: {
+    bronze: ['Find one detail about Gap Filler and one about Street Art. Add both to your retell.', 'Write a four-sentence retell in your own words. End by explaining how one idea helped the community.', 'Find a clue that helped you work out what temporary means.'],
+    silver: ['Add two details from Chips at the Mall to your timeline. Explain where they fit.', 'Write a five-sentence retell. Explain how support from others helped Zuhaib move forward.', 'Use life-changing in a new sentence and explain why it fits.'],
+    gold: ['Add two details from Patients to your sequence. Explain where they fit.', 'Write a five- or six-sentence retell. Include what Ann did and how Ngāti Ruanui responded.', 'Replace emerged with a synonym. Explain whether it keeps the meaning.']
+  },
+  10: {
+    bronze: ['Choose another detail from the article that shows people helping. Explain who it helped and how.', 'Write two sentences explaining what the article shows about compassion after the earthquakes.'],
+    silver: ['Find another clue that supports your inference about why Zuhaib gives away food.', 'Write two or three sentences connecting the help Zuhaib received with the help he gives others.'],
+    gold: ['Find a second detail about how Ngāti Ruanui treated Ann. Explain how it supports or adds to your first inference.', 'Write a short paragraph about what Ann’s actions and the response to her show about compassion. Use evidence from Patients.']
+  }
+};
 function extensionReading() {
   const colour = choices.reading;
   const [title, url] = journalLinks[colour];
@@ -34,12 +51,15 @@ function extensionReading() {
   const headings = {6:['Find it','Main idea'],8:['Put it in order','Retell it'],10:['Read for clues','Explain your inference']};
   return `<section class="card"><span class="tag ${colour}">${labels[colour]}</span><h3>${title}</h3><a class="btn" href="${url}" target="_blank" rel="noopener">Open full text ↗</a><p>Answer in full sentences. Use the starters to help.</p></section>` +
     [...headings[lesson],'Vocabulary'].map((heading,i) =>
-      card(i+1, heading, `<p>${[q1,q2,q3][i]}</p><p><strong>${[s1,s2,s3][i]}</strong></p>`, `read-${lesson}-${colour}-${i}`, 'I checked the text.')).join('');
+      card(i+1, heading, `<p>${[q1,q2,q3][i]}</p><p><strong>${[s1,s2,s3][i]}</strong></p>`, `read-${lesson}-${colour}-${i}`, 'I checked the text.')).join('') +
+    card(4, 'Read again and show your thinking', list(readingPractice[lesson][colour]),
+      `read-${lesson}-${colour}-practice`, 'I reread the text and checked my answers.') +
+    `<section class="card"><h3>Finished early?</h3><p>Write one new question about the text. Swap with a partner or answer it yourself using a detail from the reading.</p></section>`;
 }
 const spellingExamples = {
-  bronze: [['cuasebe','tghouth','priserus'],['becuse','thougt','surprize'],['because','thought','surprise']],
-  silver: [['cessaryne','tunityoppor','mendrecom'],['necesary','oportunity','recomend'],['necessary','opportunity','recommend']],
-  gold: [['legeprivi','nairequestion','sableindispen'],['privelege','questionaire','indispensible'],['privilege','questionnaire','indispensable']]
+  bronze: [['cuasebe','tghouth','priserus','therano','enoguh'],['becuse','thougt','surprize','anoter','enogh'],['because','thought','surprise','another','enough']],
+  silver: [['cessaryne','tunityoppor','mendrecom','diatelyimme','sponsibilityre'],['necesary','oportunity','recomend','imediately','responsibilty'],['necessary','opportunity','recommend','immediately','responsibility']],
+  gold: [['legeprivi','nairequestion','sableindispen','ryhierach','niummillen'],['privelege','questionaire','indispensible','heirarchy','millenium'],['privilege','questionnaire','indispensable','hierarchy','millennium']]
 };
 function extensionSpelling() {
   const colour = choices.newSpelling;
@@ -48,10 +68,10 @@ function extensionSpelling() {
   const wordBank = detail('Need to choose words? Open your word bank', list(words));
   const activities = {
     6:['Word Bubble','<p>Pick five words. Draw a bubble around each word. Underline the tricky part and write a reminder underneath.</p><div class="spelling-model"><strong>surprise</strong><div>I need to remember the r before the p.</div></div>'],
-    7:['Unjumble It','<p>Unjumble these three words. Check them, then cover and write them again.</p>'+list(jumbles)+detail('Check my words',list(answers))],
+    7:['Unjumble It','<p>Unjumble these five words. Check them, then cover and write them again.</p>'+list(jumbles)+detail('Check my words',list(answers))],
     8:['Spot the Slip','<p>Fix one spelling mistake in each word. Underline the part you fixed.</p>'+list(slips)+detail('Check my words',list(answers))],
-    9:['Words in Sentences','<p>Choose two words. Write a full sentence for each and underline your spelling words.</p>'],
-    10:['Beat Your First Try','<p>Pick three tricky words. Look, say, cover, write and check. Try any word you missed once more.</p>']
+    9:['Words in Sentences','<p>Choose five words. Write a full sentence for each and underline your spelling words.</p>'],
+    10:['Beat Your First Try','<p>Pick five tricky words. Look, say, cover, write and check. Try any word you missed once more.</p>']
   };
   const [title, task] = activities[lesson];
   const chooseWords = [6, 9, 10].includes(lesson);
@@ -61,15 +81,19 @@ function extensionSpelling() {
 const newWriting = {
   7: [
     ['Use your Lesson 5 plan. Write a title and introduce your topic.', ['Title — …','My topic is …','It matters in Aotearoa New Zealand because …']],
-    ['Write your first section. Use one heading and facts from your notes.', ['Heading — …','This section is about …','One fact is …','Another fact is …']]
+    ['Draft a first section about the historical event or situation. Use a heading, two facts and a sentence explaining why they matter.', ['Heading — …','In …, … happened.','One important detail was …','This mattered because …']],
+    ['Start a second section about compassion. Explain who helped, what they did and who benefited.', ['Heading — …','… showed compassion by …','This helped … because …']],
+    ['Reread your introduction and both sections. Add one missing detail and record where you found it.', ['Detail to add — …','Source title and page or web address — …']]
   ],
   9: [
-    ['Draft your remaining sections. Check where you explain the history and the act of compassion.', ['Heading — …','In …, … happened.','People showed care by …','This helped because …']],
+    ['Finish your historical section. Give the reader enough detail to understand what happened, when or where it happened, and why it mattered.', ['In …, … happened.','A key detail was …','This mattered because …']],
+    ['Finish your compassion section. Describe what someone did and explain the difference it made. Include at least two details from your research.', ['People showed care by …','One example was …','This helped because …']],
+    ['Write a further section explaining the result, legacy or what changed next. Give it a heading and use a fact to support it.', ['Heading — …','After this, …','A fact that shows the impact is …']],
     ['Add a short ending and list your sources.', ['This report shows …','Sources — title and page or web address']]
   ],
   10: [
-    ['Reread your report. Improve one sentence so a reader can understand your topic more clearly.', ['Before — …','After — …']],
-    ['Check your headings, facts and sources. Finish your final copy.', ['Title → Introduction → Headings and facts → Ending → Sources']]
+    ['Reread your report. Improve two sentences. Make one fact more precise and explain one idea more clearly.', ['Fact before → Fact after','Explanation before → Explanation after']],
+    ['Check your facts against your sources. Ask a partner to point out one clear section and one detail they still need. Make a final edit and finish your copy.', ['Title → Introduction → Headings and facts → Ending → Sources']]
   ]
 };
 const writingExtension = {
@@ -81,5 +105,6 @@ function extensionWriting() {
   const colour = choices.writing;
   return `<section class="card"><span class="tag ${colour}">${labels[colour]}</span><p>${writingExtension[colour]}</p>` +
     newWriting[lesson].map(([prompt, rows], i) => `<section class="question-pair"><h4>${i+1}. ${prompt}</h4><div class="book-template-page"><strong>In your book</strong>${rows.map(row=>`<div class="template-line">${row}</div>`).join('')}</div></section>`).join('') +
+    `<section class="card"><h3>Finished early?</h3><p>Add a labelled timeline or image caption that helps explain your topic. Use a fact you can check in your sources.</p></section>` +
     check(`new-write-${lesson}-${colour}`,'I checked my report.') + '</section>';
 }
